@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal Study Tester Pro</title>
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #111827;
+      --accent: #4f46e5;
+      --accent-soft: #312e81;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #f87171;
+      --success: #34d399;
+      --warning: #fbbf24;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1f2937 0, #050816 55%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.08), rgba(16,185,129,0.05));
+      border-radius: 24px;
+      padding: 20px 22px 26px;
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(148,163,184,0.2);
+      border: 1px solid rgba(55,65,81,0.9);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #818cf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .title-block p {
+      margin: 4px 0 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(156,163,175,0.3);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      background: radial-gradient(circle at top left, rgba(96,165,250,0.25), transparent 55%);
+      white-space: nowrap;
+    }
+
+    .auto-save-indicator {
+      font-size: 0.75rem;
+      color: var(--success);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .auto-save-indicator.show {
+      opacity: 1;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(15,23,42,0.92);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid rgba(55,65,81,0.8);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(129,140,248,0.09), transparent 60%);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h2 span.tag {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(79,70,229,0.18);
+      color: #a5b4fc;
+      border: 1px solid rgba(129,140,248,0.4);
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 3px;
+      display: block;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(75,85,99,0.9);
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      background: rgba(15,23,42,0.95);
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(148,163,184,0.65);
+      font-size: 0.82rem;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.7);
+      background: rgba(15,23,42,1);
+    }
+
+    textarea {
+      min-height: 90px;
+      max-height: 280px;
+      line-height: 1.5;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .row > * {
+      flex: 1 1 0;
+      min-width: 200px;
+    }
+
+    .api-key-input {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.8rem;
+    }
+
+    .small-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .info-box {
+      background: rgba(79,70,229,0.1);
+      border: 1px solid rgba(129,140,248,0.3);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      color: #a5b4fc;
+      line-height: 1.5;
+    }
+
+    .warning-box {
+      background: rgba(217,119,6,0.1);
+      border: 1px solid rgba(251,191,36,0.4);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      color: #fcd34d;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(99,102,241,0.7);
+      background: radial-gradient(circle at top left, var(--accent), var(--accent-soft));
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(79,70,229,0.45);
+      transition: transform 0.05s ease, box-shadow 0.05s, background 0.1s;
+      white-space: nowrap;
+      border: none;
+    }
+
+    .btn.secondary {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(107,114,128,0.8);
+      color: var(--text);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .btn.danger {
+      background: radial-gradient(circle at top left, #dc2626, #991b1b);
+      border-color: rgba(248,113,113,0.7);
+    }
+
+    .btn.small {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+    }
+
+    .btn:hover:not([disabled]) {
+      transform: translateY(-1px);
+      box-shadow: 0 15px 30px rgba(79,70,229,0.6);
+    }
+
+    .btn.secondary:hover:not([disabled]) {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+
+    .btn:active:not([disabled]) {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 5px 15px rgba(15,23,42,0.8);
+    }
+
+    .btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .status-bar {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      border: 1px solid rgba(75,85,99,0.8);
+      background: rgba(15,23,42,0.95);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .status-pill.ok {
+      border-color: rgba(52,211,153,0.8);
+      color: var(--success);
+      background: rgba(16,185,129,0.1);
+    }
+
+    .status-pill.err {
+      border-color: rgba(248,113,113,0.8);
+      color: var(--danger);
+      background: rgba(127,29,29,0.2);
+    }
+
+    .status-pill.warn {
+      border-color: rgba(251,191,36,0.8);
+      color: var(--warning);
+      background: rgba(217,119,6,0.1);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(15,23,42,0.95);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .questions-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .questions-list::-webkit-scrollbar-track {
+      background: rgba(15,23,42,0.5);
+      border-radius: 10px;
+    }
+
+    .questions-list::-webkit-scrollbar-thumb {
+      background: rgba(75,85,99,0.8);
+      border-radius: 10px;
+    }
+
+    .question-card {
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.9);
+      padding: 10px 12px;
+      background: rgba(15,23,42,0.96);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .question-card.grading {
+      border-color: rgba(79,70,229,0.6);
+      background: rgba(79,70,229,0.05);
+    }
+
+    .question-card.graded {
+      border-color: rgba(52,211,153,0.6);
+    }
+
+    .question-card.error {
+      border-color: rgba(248,113,113,0.6);
+    }
+
+    .grading-spinner {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(79,70,229,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .question-card.grading .grading-spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .question-type {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75,85,99,0.9);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(79,70,229,0.15);
+      color: #a5b4fc;
+    }
+
+    .question-text {
+      font-size: 0.88rem;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .feedback-block {
+      margin-top: 6px;
+      border-radius: 10px;
+      background: rgba(15,118,110,0.12);
+      border: 1px solid rgba(45,212,191,0.3);
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      color: #a7f3d0;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .error-block {
+      margin-top: 6px;
+      border-radius: 10px;
+      background: rgba(127,29,29,0.3);
+      border: 1px solid rgba(248,113,113,0.9);
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      color: #fecaca;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .overall-summary {
+      font-size: 0.85rem;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(17,24,39,0.96);
+      border: 1px solid rgba(75,85,99,0.9);
+      margin-top: 6px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .score-badge {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.96);
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .score-badge.excellent {
+      border-color: rgba(52,211,153,0.9);
+      color: var(--success);
+      background: rgba(16,185,129,0.15);
+    }
+
+    .score-badge.good {
+      border-color: rgba(52,211,153,0.9);
+      color: var(--success);
+      background: rgba(16,185,129,0.15);
+    }
+
+    .score-badge.fair {
+      border-color: rgba(251,191,36,0.9);
+      color: var(--warning);
+      background: rgba(217,119,6,0.15);
+    }
+
+    .score-badge.bad {
+      border-color: rgba(248,113,113,0.9);
+      color: var(--danger);
+      background: rgba(127,29,29,0.2);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .save-load-section {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1000px) {
+      body {
+        padding: 12px;
+      }
+      .app {
+        padding: 16px;
+        border-radius: 18px;
+      }
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .row > * {
+        min-width: 100%;
+      }
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+      border: 1px solid rgba(75,85,99,0.9);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      margin: 0 0 12px 0;
+      color: var(--text);
+    }
+
+    .modal-text {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="title-block">
+      <h1>📚 Universal Study Tester Pro</h1>
+      <p>Production-ready with auto-save, batched grading & progress tracking</p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <span id="autoSaveIndicator" class="auto-save-indicator">✓ Auto-saved</span>
+      <div class="pill">Enhanced · Reliable · Fast</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- LEFT: Setup & Study Material -->
+    <div class="card">
+      <div class="card-inner">
+        <h2>📝 Setup & Study Material <span class="tag">Configure</span></h2>
+
+        <div>
+          <label>OpenAI API Key <span style="color: var(--danger);">*</span></label>
+          <div style="display: flex; gap: 6px;">
+            <input id="apiKeyInput" type="password" class="api-key-input" placeholder="sk-proj-..." style="flex: 1;" />
+            <button id="verifyKeyBtn" class="btn secondary small">✓ Verify</button>
+            <button id="clearKeyBtn" class="btn danger small">🗑️</button>
+          </div>
+          <div class="small-note">🔒 Obfuscated in localStorage. <strong>Set usage limits on OpenAI dashboard!</strong></div>
+        </div>
+
+        <div>
+          <label>Subject / Topic</label>
+          <input id="subjectInput" type="text" placeholder="e.g., Biology Chapter 5, Python Programming, World War II" />
+          <div class="small-note">💡 Be specific to get better grading</div>
+        </div>
+
+        <div>
+          <label>Study Material / Reference Notes <span style="color: var(--danger);">*</span></label>
+          <textarea id="materialInput" placeholder="Paste your notes, definitions, formulas, or study material here. The AI will generate questions from this AND use it for grading.
+
+💡 Tip: Keep it focused (1-3 pages). For large materials, break into separate tests."></textarea>
+          <div class="small-note">📋 AI will generate questions from this material if you don't provide specific questions below</div>
+        </div>
+
+        <div>
+          <label>Question Types <span style="color: var(--danger);">*</span> (select what you want to include)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem;">
+              <input type="checkbox" id="includeVocab" style="width: auto; cursor: pointer;">
+              <span>💡 Vocabulary/Terms</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem;">
+              <input type="checkbox" id="includeShortAnswer" style="width: auto; cursor: pointer;">
+              <span>✏️ Short Answer</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem;">
+              <input type="checkbox" id="includeLongAnswer" style="width: auto; cursor: pointer;">
+              <span>📝 Long Answer</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem;">
+              <input type="checkbox" id="includeEssay" style="width: auto; cursor: pointer;">
+              <span>📄 Essay</span>
+            </label>
+          </div>
+          <div class="small-note" style="margin-top: 6px;">✓ Select one or more question types</div>
+        </div>
+
+        <div id="vocabSection" style="display: none;">
+          <label>Vocabulary Terms (one per line) - <em>Optional</em></label>
+          <textarea id="vocabInput" placeholder="mitochondria
+photosynthesis
+DNA replication
+
+Leave empty to let AI generate vocabulary questions from your study material"></textarea>
+          <div class="small-note">💡 AI generates "Define: [term]" questions. Leave empty to auto-generate from material.</div>
+        </div>
+
+        <div id="shortAnswerSection" style="display: none;">
+          <label>Short Answer Questions (one per line) - <em>Optional</em></label>
+          <textarea id="shortAnswerInput" placeholder="What is the function of mitochondria?
+How does photosynthesis work?
+
+Leave empty to let AI generate short answer questions from your study material"></textarea>
+          <div class="small-note">✏️ 2-4 sentence answers expected. Leave empty to auto-generate from material.</div>
+        </div>
+
+        <div id="longAnswerSection" style="display: none;">
+          <label>Long Answer Questions (one per line) - <em>Optional</em></label>
+          <textarea id="longAnswerInput" placeholder="Explain the process of DNA replication.
+Describe how enzymes catalyze reactions.
+
+Leave empty to let AI generate long answer questions from your study material"></textarea>
+          <div class="small-note">📝 1-2 paragraph answers expected. Leave empty to auto-generate from material.</div>
+        </div>
+
+        <div id="essaySection" style="display: none;">
+          <label>Essay Questions (one per line) - <em>Optional</em></label>
+          <textarea id="essayInput" placeholder="Explain photosynthesis and its significance.
+Compare and contrast mitosis and meiosis.
+
+Leave empty to let AI generate essay questions from your study material"></textarea>
+          <div class="small-note">📄 Multi-paragraph responses expected. Leave empty to auto-generate from material.</div>
+        </div>
+
+        <div class="button-group">
+          <button id="buildBtn" class="btn">🚀 Generate Practice Test</button>
+          <button id="clearBtn" class="btn secondary small">🗑️ Clear All</button>
+        </div>
+
+        <div class="save-load-section">
+          <button id="saveSetupBtn" class="btn secondary small">💾 Save Setup</button>
+          <button id="loadSetupBtn" class="btn secondary small">📂 Load Setup</button>
+        </div>
+
+        <div class="status-bar">
+          <span id="leftStatus" class="status-pill">Ready to start</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Questions, Answers, Feedback -->
+    <div class="card">
+      <div class="card-inner">
+        <h2>✍️ Practice Test <span class="tag">Answer & Grade</span></h2>
+
+        <div id="emptyState" class="info-box">
+          <strong>👈 Get started:</strong><br>
+          1. Enter your OpenAI API key & verify it <span style="color: var(--danger);">*</span><br>
+          2. Add your study material <span style="color: var(--danger);">*</span><br>
+          3. Select question types <span style="color: var(--danger);">*</span><br>
+          4. (Optional) Add specific questions, OR let AI generate them from your material<br>
+          5. Click "Generate Practice Test"<br><br>
+          💡 <strong>Auto-save is active</strong> - your work is saved automatically!
+        </div>
+
+        <div id="gradingProgress" style="display: none;">
+          <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 4px;">
+            <span id="progressText">Grading questions...</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="questions-list" id="questionsContainer"></div>
+
+        <div id="summaryContainer"></div>
+
+        <div class="button-group" style="margin-top: 8px;">
+          <button id="gradeBtn" class="btn secondary" disabled>🎯 Grade My Answers</button>
+          <button id="resetAnswersBtn" class="btn secondary small" disabled>↺ Reset Answers</button>
+          <button id="exportBtn" class="btn secondary small" disabled>📤 Export Results</button>
+        </div>
+
+        <div class="status-bar">
+          <span id="rightStatus" class="status-pill">No questions yet</span>
+        </div>
+
+        <div id="errorContainer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-Save Recovery Modal -->
+<div id="recoveryModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 class="modal-title">📦 Recover Previous Session?</h3>
+    <p class="modal-text">
+      We found an auto-saved session from <span id="recoveryTimestamp"></span>. 
+      Would you like to restore it?
+    </p>
+    <div class="modal-buttons">
+      <button id="discardRecoveryBtn" class="btn secondary small">Discard</button>
+      <button id="restoreRecoveryBtn" class="btn small">Restore</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== DOM ELEMENTS =====
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const verifyKeyBtn = document.getElementById('verifyKeyBtn');
+  const clearKeyBtn = document.getElementById('clearKeyBtn');
+  const subjectInput = document.getElementById('subjectInput');
+  const materialInput = document.getElementById('materialInput');
+  
+  const includeVocab = document.getElementById('includeVocab');
+  const includeShortAnswer = document.getElementById('includeShortAnswer');
+  const includeLongAnswer = document.getElementById('includeLongAnswer');
+  const includeEssay = document.getElementById('includeEssay');
+  
+  const vocabInput = document.getElementById('vocabInput');
+  const shortAnswerInput = document.getElementById('shortAnswerInput');
+  const longAnswerInput = document.getElementById('longAnswerInput');
+  const essayInput = document.getElementById('essayInput');
+  
+  const vocabSection = document.getElementById('vocabSection');
+  const shortAnswerSection = document.getElementById('shortAnswerSection');
+  const longAnswerSection = document.getElementById('longAnswerSection');
+  const essaySection = document.getElementById('essaySection');
+
+  const buildBtn = document.getElementById('buildBtn');
+  const gradeBtn = document.getElementById('gradeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const resetAnswersBtn = document.getElementById('resetAnswersBtn');
+  const saveSetupBtn = document.getElementById('saveSetupBtn');
+  const loadSetupBtn = document.getElementById('loadSetupBtn');
+  const exportBtn = document.getElementById('exportBtn');
+
+  const leftStatus = document.getElementById('leftStatus');
+  const rightStatus = document.getElementById('rightStatus');
+  const questionsContainer = document.getElementById('questionsContainer');
+  const summaryContainer = document.getElementById('summaryContainer');
+  const errorContainer = document.getElementById('errorContainer');
+  const emptyState = document.getElementById('emptyState');
+  const autoSaveIndicator = document.getElementById('autoSaveIndicator');
+  const gradingProgress = document.getElementById('gradingProgress');
+  const progressText = document.getElementById('progressText');
+  const progressFill = document.getElementById('progressFill');
+
+  const recoveryModal = document.getElementById('recoveryModal');
+  const recoveryTimestamp = document.getElementById('recoveryTimestamp');
+  const restoreRecoveryBtn = document.getElementById('restoreRecoveryBtn');
+  const discardRecoveryBtn = document.getElementById('discardRecoveryBtn');
+
+  let currentQuestions = [];
+  let gradingResults = null;
+  let autoSaveTimer = null;
+  let isGrading = false;
+
+  // ===== API KEY MANAGEMENT =====
+  function saveApiKey() {
+    const key = apiKeyInput.value.trim();
+    if (key) {
+      try {
+        const obfuscated = btoa(key);
+        localStorage.setItem('studyTesterApiKey', obfuscated);
+      } catch (e) {
+        console.error('Failed to save API key:', e);
+      }
+    }
+  }
+
+  function getApiKey() {
+    const input = apiKeyInput.value.trim();
+    if (input) return input;
+
+    const saved = localStorage.getItem('studyTesterApiKey');
+    if (saved) {
+      try {
+        return atob(saved);
+      } catch {
+        return saved;
+      }
+    }
+    return '';
+  }
+
+  function loadApiKey() {
+    const saved = localStorage.getItem('studyTesterApiKey');
+    if (saved) {
+      try {
+        apiKeyInput.value = atob(saved);
+      } catch {
+        apiKeyInput.value = saved;
+      }
+    }
+  }
+
+  apiKeyInput.addEventListener('change', saveApiKey);
+
+  clearKeyBtn.addEventListener('click', () => {
+    if (confirm('Clear saved API key? You\'ll need to enter it again.')) {
+      localStorage.removeItem('studyTesterApiKey');
+      apiKeyInput.value = '';
+      setLeftStatus('API key cleared', 'warn');
+    }
+  });
+
+  // ===== API KEY VERIFICATION =====
+  verifyKeyBtn.addEventListener('click', async () => {
+    const key = getApiKey();
+    if (!key) {
+      showError('Please enter an API key first.');
+      return;
+    }
+
+    verifyKeyBtn.disabled = true;
+    verifyKeyBtn.textContent = '⏳ Verifying...';
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/models', {
+        headers: { 'Authorization': 'Bearer ' + key }
+      });
+
+      if (response.ok) {
+        setLeftStatus('✓ API key verified', 'ok');
+        saveApiKey();
+        verifyKeyBtn.textContent = '✓ Verified';
+        setTimeout(() => {
+          verifyKeyBtn.textContent = '✓ Verify';
+          verifyKeyBtn.disabled = false;
+        }, 2000);
+      } else {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error?.message || 'Invalid API key');
+      }
+    } catch (err) {
+      showError(`API key verification failed: ${err.message}`);
+      setLeftStatus('Invalid API key', 'err');
+      verifyKeyBtn.textContent = '✗ Failed';
+      setTimeout(() => {
+        verifyKeyBtn.textContent = '✓ Verify';
+        verifyKeyBtn.disabled = false;
+      }, 2000);
+    }
+  });
+
+  // ===== AUTO-SAVE SYSTEM =====
+  function showAutoSaveIndicator() {
+    autoSaveIndicator.classList.add('show');
+    setTimeout(() => {
+      autoSaveIndicator.classList.remove('show');
+    }, 2000);
+  }
+
+  function autoSave() {
+    const state = {
+      subject: subjectInput.value,
+      material: materialInput.value,
+      questionTypes: {
+        vocab: includeVocab.checked,
+        shortAnswer: includeShortAnswer.checked,
+        longAnswer: includeLongAnswer.checked,
+        essay: includeEssay.checked
+      },
+      vocab: vocabInput.value,
+      shortAnswer: shortAnswerInput.value,
+      longAnswer: longAnswerInput.value,
+      essay: essayInput.value,
+      answers: {},
+      timestamp: Date.now()
+    };
+
+    // Save current answers
+    const textareas = questionsContainer.querySelectorAll('textarea[data-qid]');
+    textareas.forEach(ta => {
+      const qid = ta.dataset.qid;
+      if (ta.value.trim()) {
+        state.answers[qid] = ta.value;
+      }
+    });
+
+    try {
+      localStorage.setItem('studyTesterAutoSave', JSON.stringify(state));
+      showAutoSaveIndicator();
+      console.log('Auto-saved at', new Date().toLocaleTimeString());
+    } catch (e) {
+      console.error('Auto-save failed:', e);
+    }
+  }
+
+  function loadAutoSave(silent = false) {
+    try {
+      const saved = localStorage.getItem('studyTesterAutoSave');
+      if (!saved) return false;
+
+      const state = JSON.parse(saved);
+      
+      // Check if auto-save is recent (within 7 days)
+      const age = Date.now() - (state.timestamp || 0);
+      if (age > 7 * 24 * 60 * 60 * 1000) {
+        console.log('Auto-save too old, ignoring');
+        return false;
+      }
+
+      // If not silent, show recovery modal
+      if (!silent && (state.subject || state.material || Object.keys(state.answers || {}).length > 0)) {
+        const date = new Date(state.timestamp);
+        recoveryTimestamp.textContent = date.toLocaleString();
+        recoveryModal.classList.add('show');
+        
+        restoreRecoveryBtn.onclick = () => {
+          restoreAutoSave(state);
+          recoveryModal.classList.remove('show');
+        };
+        
+        discardRecoveryBtn.onclick = () => {
+          localStorage.removeItem('studyTesterAutoSave');
+          recoveryModal.classList.remove('show');
+        };
+        
+        return true;
+      }
+
+      if (silent) {
+        restoreAutoSave(state);
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      console.error('Failed to load auto-save:', e);
+      return false;
+    }
+  }
+
+  function restoreAutoSave(state) {
+    subjectInput.value = state.subject || '';
+    materialInput.value = state.material || '';
+    
+    if (state.questionTypes) {
+      includeVocab.checked = state.questionTypes.vocab || false;
+      includeShortAnswer.checked = state.questionTypes.shortAnswer || false;
+      includeLongAnswer.checked = state.questionTypes.longAnswer || false;
+      includeEssay.checked = state.questionTypes.essay || false;
+    }
+    
+    vocabInput.value = state.vocab || '';
+    shortAnswerInput.value = state.shortAnswer || '';
+    longAnswerInput.value = state.longAnswer || '';
+    essayInput.value = state.essay || '';
+    
+    updateSectionVisibility();
+
+    // Restore answers if available
+    if (state.answers && Object.keys(state.answers).length > 0) {
+      setTimeout(() => {
+        Object.entries(state.answers).forEach(([qid, answer]) => {
+          const ta = questionsContainer.querySelector(`textarea[data-qid="${qid}"]`);
+          if (ta) ta.value = answer;
+        });
+      }, 100);
+    }
+
+    setLeftStatus('Session restored', 'ok');
+  }
+
+  function scheduleAutoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(autoSave, 1000);
+  }
+
+  // Attach auto-save listeners
+  [subjectInput, materialInput, vocabInput, shortAnswerInput, longAnswerInput, essayInput].forEach(input => {
+    input.addEventListener('input', scheduleAutoSave);
+  });
+
+  [includeVocab, includeShortAnswer, includeLongAnswer, includeEssay].forEach(checkbox => {
+    checkbox.addEventListener('change', scheduleAutoSave);
+  });
+
+  questionsContainer.addEventListener('input', (e) => {
+    if (e.target.tagName === 'TEXTAREA' && e.target.dataset.qid) {
+      scheduleAutoSave();
+    }
+  });
+
+  // ===== QUESTION TYPE HANDLING =====
+  function updateSectionVisibility() {
+    vocabSection.style.display = includeVocab.checked ? 'block' : 'none';
+    shortAnswerSection.style.display = includeShortAnswer.checked ? 'block' : 'none';
+    longAnswerSection.style.display = includeLongAnswer.checked ? 'block' : 'none';
+    essaySection.style.display = includeEssay.checked ? 'block' : 'none';
+  }
+
+  includeVocab.addEventListener('change', updateSectionVisibility);
+  includeShortAnswer.addEventListener('change', updateSectionVisibility);
+  includeLongAnswer.addEventListener('change', updateSectionVisibility);
+  includeEssay.addEventListener('change', updateSectionVisibility);
+
+  // ===== STATUS & ERROR HANDLING =====
+  function setLeftStatus(text, type = '') {
+    leftStatus.textContent = text;
+    leftStatus.classList.remove('ok', 'err', 'warn');
+    if (type) leftStatus.classList.add(type);
+  }
+
+  function setRightStatus(text, type = '') {
+    rightStatus.textContent = text;
+    rightStatus.classList.remove('ok', 'err', 'warn');
+    if (type) rightStatus.classList.add(type);
+  }
+
+  function showError(msg) {
+    console.error('StudyTester error:', msg);
+    errorContainer.innerHTML = '';
+    const block = document.createElement('div');
+    block.className = 'error-block';
+    block.innerHTML = `<strong>❌ Error:</strong> ${msg}`;
+    errorContainer.appendChild(block);
+  }
+
+  function clearError() {
+    errorContainer.innerHTML = '';
+  }
+
+  // ===== OPENAI API CALL WITH RETRY =====
+  async function callOpenAI(apiKey, messages, isJsonMode = false, retries = 2) {
+    const body = {
+      model: 'gpt-4o-mini',
+      messages: messages,
+      temperature: 0.7
+    };
+
+    if (isJsonMode) {
+      body.response_format = { type: 'json_object' };
+    }
+
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          const errorMsg = errorData.error?.message || `API error ${res.status}`;
+          throw new Error(errorMsg);
+        }
+
+        const data = await res.json();
+        return data.choices[0].message.content;
+      } catch (error) {
+        if (attempt === retries) throw error;
+        console.warn(`Attempt ${attempt + 1} failed, retrying...`, error);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  }
+
+  // ===== SAFE JSON PARSING =====
+  function safeJsonParse(text) {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      // Try to extract JSON from markdown code blocks
+      const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/) || text.match(/```\s*([\s\S]*?)\s*```/);
+      if (jsonMatch) {
+        try {
+          return JSON.parse(jsonMatch[1].trim());
+        } catch {}
+      }
+
+      // Try to find JSON object boundaries
+      const startIdx = text.indexOf('{');
+      const endIdx = text.lastIndexOf('}');
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+        try {
+          return JSON.parse(text.substring(startIdx, endIdx + 1));
+        } catch {}
+      }
+
+      throw new Error('Could not parse AI response as JSON');
+    }
+  }
+
+  // ===== RENDER QUESTIONS =====
+  function renderQuestions() {
+    questionsContainer.innerHTML = '';
+    summaryContainer.innerHTML = '';
+    clearError();
+    gradingProgress.style.display = 'none';
+
+    if (currentQuestions.length === 0) {
+      emptyState.style.display = 'block';
+      setRightStatus('No questions yet');
+      gradeBtn.disabled = true;
+      resetAnswersBtn.disabled = true;
+      exportBtn.disabled = true;
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    gradeBtn.disabled = false;
+    resetAnswersBtn.disabled = false;
+
+    currentQuestions.forEach((q, index) => {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.dataset.qid = q.id;
+
+      const spinner = document.createElement('div');
+      spinner.className = 'grading-spinner';
+
+      const header = document.createElement('div');
+      header.className = 'question-header';
+
+      const left = document.createElement('div');
+      left.textContent = `Question ${index + 1}`;
+
+      const typeBadge = document.createElement('div');
+      typeBadge.className = 'question-type';
+      const typeLabels = {
+        'vocab': '💡 Vocabulary',
+        'short_answer': '✏️ Short Answer',
+        'long_answer': '📝 Long Answer',
+        'essay': '📄 Essay'
+      };
+      typeBadge.textContent = typeLabels[q.type] || '❓ Question';
+
+      header.appendChild(left);
+      header.appendChild(typeBadge);
+
+      const text = document.createElement('div');
+      text.className = 'question-text';
+      text.textContent = q.text;
+
+      const label = document.createElement('label');
+      label.textContent = 'Your Answer:';
+
+      const ta = document.createElement('textarea');
+      ta.dataset.qid = q.id;
+      
+      const textareaConfig = {
+        'vocab': { rows: 2, placeholder: 'Write a brief definition...' },
+        'short_answer': { rows: 3, placeholder: 'Write 2-4 sentences...' },
+        'long_answer': { rows: 5, placeholder: 'Write 1-2 paragraphs...' },
+        'essay': { rows: 8, placeholder: 'Write a comprehensive essay...' }
+      };
+      
+      const config = textareaConfig[q.type] || textareaConfig['short_answer'];
+      ta.rows = config.rows;
+      ta.placeholder = config.placeholder;
+
+      const feedbackDiv = document.createElement('div');
+      feedbackDiv.className = 'feedback-block';
+      feedbackDiv.dataset.feedbackFor = q.id;
+
+      card.appendChild(spinner);
+      card.appendChild(header);
+      card.appendChild(text);
+      card.appendChild(label);
+      card.appendChild(ta);
+      card.appendChild(feedbackDiv);
+
+      questionsContainer.appendChild(card);
+    });
+
+    setRightStatus(`${currentQuestions.length} questions ready`, 'ok');
+  }
+
+  // ===== BUILD TEST =====
+  buildBtn.addEventListener('click', async () => {
+    clearError();
+    summaryContainer.innerHTML = '';
+    gradingResults = null;
+
+    const material = materialInput.value.trim();
+    const apiKey = getApiKey();
+
+    if (!material) {
+      showError('Please add study material first. This is required for generating questions.');
+      setLeftStatus('Missing study material', 'err');
+      return;
+    }
+
+    if (!includeVocab.checked && !includeShortAnswer.checked && !includeLongAnswer.checked && !includeEssay.checked) {
+      showError('Please select at least one question type.');
+      setLeftStatus('No question types selected', 'err');
+      return;
+    }
+
+    const vocabTerms = includeVocab.checked ? vocabInput.value.split('\n').map(l => l.trim()).filter(Boolean) : [];
+    const shortAnswers = includeShortAnswer.checked ? shortAnswerInput.value.split('\n').map(l => l.trim()).filter(Boolean) : [];
+    const longAnswers = includeLongAnswer.checked ? longAnswerInput.value.split('\n').map(l => l.trim()).filter(Boolean) : [];
+    const essays = includeEssay.checked ? essayInput.value.split('\n').map(l => l.trim()).filter(Boolean) : [];
+
+    // Check if we need to generate questions from material
+    const needsGeneration = (
+      (includeVocab.checked && vocabTerms.length === 0) ||
+      (includeShortAnswer.checked && shortAnswers.length === 0) ||
+      (includeLongAnswer.checked && longAnswers.length === 0) ||
+      (includeEssay.checked && essays.length === 0)
+    );
+
+    let generatedQuestions = {
+      vocab: vocabTerms,
+      shortAnswer: shortAnswers,
+      longAnswer: longAnswers,
+      essay: essays
+    };
+
+    // Generate questions from study material if needed
+    if (needsGeneration) {
+      if (!apiKey) {
+        showError('API key required to generate questions from study material. Please verify your key first.');
+        setLeftStatus('Missing API key', 'err');
+        return;
+      }
+
+      buildBtn.disabled = true;
+      setLeftStatus('🤖 AI generating questions from your material...', '');
+
+      try {
+        const typesToGenerate = [];
+        if (includeVocab.checked && vocabTerms.length === 0) typesToGenerate.push('vocabulary');
+        if (includeShortAnswer.checked && shortAnswers.length === 0) typesToGenerate.push('short_answer');
+        if (includeLongAnswer.checked && longAnswers.length === 0) typesToGenerate.push('long_answer');
+        if (includeEssay.checked && essays.length === 0) typesToGenerate.push('essay');
+
+        const subject = subjectInput.value.trim() || 'the provided material';
+        
+        const generationPrompt = `You are an expert educator creating practice questions from study material.
+
+STUDY MATERIAL:
+${material}
+
+SUBJECT: ${subject}
+
+Generate practice questions for the following types:
+${typesToGenerate.map(t => `- ${t}`).join('\n')}
+
+Guidelines:
+- Vocabulary: Extract 5-8 key terms/concepts for definition questions
+- Short Answer: Create 3-5 questions requiring 2-4 sentence answers
+- Long Answer: Create 2-3 questions requiring 1-2 paragraph explanations
+- Essay: Create 1-2 comprehensive questions requiring multi-paragraph responses
+
+Return ONLY valid JSON in this exact format:
+{
+  "vocab": ["term1", "term2", ...],
+  "short_answer": ["question1?", "question2?", ...],
+  "long_answer": ["question1?", "question2?", ...],
+  "essay": ["question1?", "question2?", ...]
+}
+
+Important: Only include arrays for the types requested. Make questions specific to the material.`;
+
+        const messages = [
+          { role: 'system', content: 'You are a helpful educator. Respond only with valid JSON.' },
+          { role: 'user', content: generationPrompt }
+        ];
+
+        const responseText = await callOpenAI(apiKey, messages, true);
+        const generated = safeJsonParse(responseText);
+
+        // Merge generated questions with user-provided ones
+        if (includeVocab.checked && vocabTerms.length === 0 && generated.vocab) {
+          generatedQuestions.vocab = generated.vocab;
+        }
+        if (includeShortAnswer.checked && shortAnswers.length === 0 && generated.short_answer) {
+          generatedQuestions.shortAnswer = generated.short_answer;
+        }
+        if (includeLongAnswer.checked && longAnswers.length === 0 && generated.long_answer) {
+          generatedQuestions.longAnswer = generated.long_answer;
+        }
+        if (includeEssay.checked && essays.length === 0 && generated.essay) {
+          generatedQuestions.essay = generated.essay;
+        }
+
+        setLeftStatus('✓ AI generated questions from material', 'ok');
+      } catch (err) {
+        console.error(err);
+        showError(`Failed to generate questions: ${err.message}`);
+        setLeftStatus('Question generation failed', 'err');
+        buildBtn.disabled = false;
+        return;
+      } finally {
+        buildBtn.disabled = false;
+      }
+    }
+
+    // Build final question list
+    const questions = [];
+    let idCounter = 1;
+
+    generatedQuestions.vocab.forEach(term => {
+      questions.push({ id: idCounter++, type: 'vocab', text: `Define: ${term}` });
+    });
+
+    generatedQuestions.shortAnswer.forEach(q => {
+      questions.push({ id: idCounter++, type: 'short_answer', text: q });
+    });
+
+    generatedQuestions.longAnswer.forEach(q => {
+      questions.push({ id: idCounter++, type: 'long_answer', text: q });
+    });
+
+    generatedQuestions.essay.forEach(q => {
+      questions.push({ id: idCounter++, type: 'essay', text: q });
+    });
+
+    if (questions.length === 0) {
+      showError('No questions generated. Please check your inputs or study material.');
+      setLeftStatus('No questions created', 'err');
+      return;
+    }
+
+    currentQuestions = questions;
+    renderQuestions();
+    
+    const typeBreakdown = [];
+    if (generatedQuestions.vocab.length > 0) typeBreakdown.push(`${generatedQuestions.vocab.length} vocab`);
+    if (generatedQuestions.shortAnswer.length > 0) typeBreakdown.push(`${generatedQuestions.shortAnswer.length} short`);
+    if (generatedQuestions.longAnswer.length > 0) typeBreakdown.push(`${generatedQuestions.longAnswer.length} long`);
+    if (generatedQuestions.essay.length > 0) typeBreakdown.push(`${generatedQuestions.essay.length} essay`);
+    
+    const generatedNote = needsGeneration ? ' (some AI-generated)' : '';
+    setLeftStatus(`✓ Generated ${questions.length} questions${generatedNote} (${typeBreakdown.join(', ')})`, 'ok');
+    autoSave();
+  });
+
+  // ===== BATCHED GRADING WITH PROGRESS =====
+  gradeBtn.addEventListener('click', async () => {
+    if (isGrading) return;
+
+    clearError();
+    summaryContainer.innerHTML = '';
+
+    const apiKey = getApiKey();
+    const material = materialInput.value.trim();
+    const subject = subjectInput.value.trim() || 'General Study';
+
+    if (!apiKey) {
+      showError('Please enter your OpenAI API key.');
+      setRightStatus('Missing API key', 'err');
+      return;
+    }
+
+    if (!material) {
+      showError('Please add your study material/notes.');
+      setRightStatus('Missing material', 'err');
+      return;
+    }
+
+    const answers = [];
+    const textareas = questionsContainer.querySelectorAll('textarea[data-qid]');
+    let hasAnswer = false;
+
+    textareas.forEach(ta => {
+      const qid = parseInt(ta.dataset.qid, 10);
+      const question = currentQuestions.find(q => q.id === qid);
+      const answer = ta.value.trim();
+      if (question) {
+        answers.push({
+          question_id: qid,
+          question_text: question.text,
+          type: question.type,
+          user_answer: answer || '[No answer provided]'
+        });
+        if (answer) hasAnswer = true;
+      }
+    });
+
+    if (!hasAnswer) {
+      showError('Please answer at least one question.');
+      setRightStatus('No answers', 'warn');
+      return;
+    }
+
+    isGrading = true;
+    buildBtn.disabled = true;
+    gradeBtn.disabled = true;
+    clearBtn.disabled = true;
+    gradingProgress.style.display = 'block';
+    
+    setRightStatus('🤖 AI grading in progress...', '');
+
+    const BATCH_SIZE = 3; // Grade 3 questions at a time
+    const batches = [];
+    for (let i = 0; i < answers.length; i += BATCH_SIZE) {
+      batches.push(answers.slice(i, i + BATCH_SIZE));
+    }
+
+    const allResults = [];
+    let completed = 0;
+
+    try {
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        
+        progressText.textContent = `Grading questions ${completed + 1}-${completed + batch.length} of ${answers.length}...`;
+        progressFill.style.width = `${(completed / answers.length) * 100}%`;
+
+        // Mark questions as grading
+        batch.forEach(ans => {
+          const card = questionsContainer.querySelector(`[data-qid="${ans.question_id}"]`);
+          if (card) card.classList.add('grading');
+        });
+
+        const typeDescriptions = {
+          'vocab': 'Vocabulary - Brief definition expected',
+          'short_answer': 'Short Answer - 2-4 sentences expected',
+          'long_answer': 'Long Answer - 1-2 paragraphs expected',
+          'essay': 'Essay - Multi-paragraph comprehensive response expected'
+        };
+
+        const gradingPrompt = `You are an expert ${subject} educator grading practice questions.
+
+STUDY MATERIAL (use as grading rubric):
+${material}
+
+QUESTIONS TO GRADE:
+${batch.map((a, idx) => `
+Question ${completed + idx + 1} (${typeDescriptions[a.type]}):
+${a.question_text}
+
+Student's Answer:
+${a.user_answer}
+`).join('\n---\n')}
+
+GRADING INSTRUCTIONS:
+Grade each answer 0-10 based on:
+- Vocabulary: Accuracy and completeness
+- Short Answer: Clarity, accuracy, appropriate length (2-4 sentences)
+- Long Answer: Depth, detail, comprehensive explanation (1-2 paragraphs)
+- Essay: Thoroughness, organization, analysis, structure
+
+For each answer provide:
+- What was correct
+- What was missing/incorrect
+- Specific improvement advice
+
+Return ONLY valid JSON:
+{
+  "questions": [
+    {
+      "question_id": number,
+      "score": number,
+      "what_was_correct": "string",
+      "what_was_missing": "string",
+      "improvement_advice": "string"
+    }
+  ]
+}`;
+
+        const messages = [
+          { role: 'system', content: 'You are a helpful educator providing constructive feedback. Respond only with valid JSON.' },
+          { role: 'user', content: gradingPrompt }
+        ];
+
+        const responseText = await callOpenAI(apiKey, messages, true);
+        const parsed = safeJsonParse(responseText);
+
+        if (!parsed.questions || !Array.isArray(parsed.questions)) {
+          throw new Error('Invalid grading response format');
+        }
+
+        allResults.push(...parsed.questions);
+
+        // Display feedback
+        parsed.questions.forEach(result => {
+          const card = questionsContainer.querySelector(`[data-qid="${result.question_id}"]`);
+          if (card) {
+            card.classList.remove('grading');
+            card.classList.add('graded');
+          }
+
+          const feedbackBlock = questionsContainer.querySelector(`[data-feedback-for="${result.question_id}"]`);
+          if (feedbackBlock) {
+            feedbackBlock.style.display = 'block';
+            feedbackBlock.innerHTML = `
+<strong>Score: ${result.score}/10</strong>
+
+<strong>✓ Correct:</strong> ${result.what_was_correct}
+
+<strong>✗ Missing/Incorrect:</strong> ${result.what_was_missing}
+
+<strong>💡 Improvement:</strong> ${result.improvement_advice}
+            `.trim();
+          }
+        });
+
+        completed += batch.length;
+        progressFill.style.width = `${(completed / answers.length) * 100}%`;
+      }
+
+      // Calculate overall score
+      const avgScore = allResults.reduce((sum, r) => sum + (r.score || 0), 0) / allResults.length;
+      
+      gradingResults = {
+        overall_score: avgScore,
+        overall_summary: `Completed grading ${allResults.length} questions. Average score: ${avgScore.toFixed(1)}/10.`,
+        questions: allResults
+      };
+
+      // Display overall summary
+      const overall = document.createElement('div');
+      overall.className = 'overall-summary';
+
+      const badge = document.createElement('div');
+      badge.className = 'score-badge';
+      
+      if (avgScore >= 9) {
+        badge.classList.add('excellent');
+        badge.textContent = `🏆 Overall: ${avgScore.toFixed(1)}/10 - Excellent!`;
+      } else if (avgScore >= 7) {
+        badge.classList.add('good');
+        badge.textContent = `🎯 Overall: ${avgScore.toFixed(1)}/10 - Good Work!`;
+      } else if (avgScore >= 5) {
+        badge.classList.add('fair');
+        badge.textContent = `📊 Overall: ${avgScore.toFixed(1)}/10 - Keep Practicing!`;
+      } else {
+        badge.classList.add('bad');
+        badge.textContent = `📈 Overall: ${avgScore.toFixed(1)}/10 - Review Material`;
+      }
+
+      const txtDiv = document.createElement('div');
+      txtDiv.style.marginTop = '8px';
+      txtDiv.textContent = gradingResults.overall_summary;
+
+      overall.appendChild(badge);
+      overall.appendChild(txtDiv);
+      summaryContainer.appendChild(overall);
+
+      setRightStatus('✓ Grading complete', 'ok');
+      exportBtn.disabled = false;
+      progressText.textContent = 'Grading complete!';
+
+    } catch (err) {
+      console.error(err);
+      showError(err.message || 'Grading failed. Please check your API key and try again.');
+      setRightStatus('Grading failed', 'err');
+      
+      // Remove grading class from all cards
+      questionsContainer.querySelectorAll('.grading').forEach(card => {
+        card.classList.remove('grading');
+        card.classList.add('error');
+      });
+    } finally {
+      isGrading = false;
+      buildBtn.disabled = false;
+      gradeBtn.disabled = false;
+      clearBtn.disabled = false;
+      setTimeout(() => {
+        gradingProgress.style.display = 'none';
+      }, 3000);
+    }
+  });
+
+  // ===== CLEAR ALL =====
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Clear all content? This cannot be undone.')) return;
+    
+    subjectInput.value = '';
+    materialInput.value = '';
+    vocabInput.value = '';
+    shortAnswerInput.value = '';
+    longAnswerInput.value = '';
+    essayInput.value = '';
+    
+    includeVocab.checked = false;
+    includeShortAnswer.checked = false;
+    includeLongAnswer.checked = false;
+    includeEssay.checked = false;
+    updateSectionVisibility();
+    
+    currentQuestions = [];
+    gradingResults = null;
+    renderQuestions();
+    localStorage.removeItem('studyTesterAutoSave');
+    setLeftStatus('Cleared', 'ok');
+  });
+
+  // ===== RESET ANSWERS =====
+  resetAnswersBtn.addEventListener('click', () => {
+    if (!confirm('Reset all answers? This cannot be undone.')) return;
+    
+    const textareas = questionsContainer.querySelectorAll('textarea[data-qid]');
+    textareas.forEach(ta => ta.value = '');
+    
+    const feedbackBlocks = questionsContainer.querySelectorAll('.feedback-block');
+    feedbackBlocks.forEach(fb => fb.style.display = 'none');
+    
+    const cards = questionsContainer.querySelectorAll('.question-card');
+    cards.forEach(card => card.classList.remove('graded', 'error'));
+    
+    summaryContainer.innerHTML = '';
+    gradingResults = null;
+    exportBtn.disabled = true;
+    
+    setRightStatus('Answers reset', 'ok');
+    autoSave();
+  });
+
+  // ===== SAVE/LOAD SETUP =====
+  saveSetupBtn.addEventListener('click', () => {
+    const setup = {
+      subject: subjectInput.value,
+      material: materialInput.value,
+      questionTypes: {
+        vocab: includeVocab.checked,
+        shortAnswer: includeShortAnswer.checked,
+        longAnswer: includeLongAnswer.checked,
+        essay: includeEssay.checked
+      },
+      vocab: vocabInput.value,
+      shortAnswer: shortAnswerInput.value,
+      longAnswer: longAnswerInput.value,
+      essay: essayInput.value,
+      timestamp: new Date().toISOString()
+    };
+    
+    const json = JSON.stringify(setup, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-setup-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    setLeftStatus('Setup saved', 'ok');
+  });
+
+  loadSetupBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const setup = JSON.parse(event.target.result);
+          
+          subjectInput.value = setup.subject || '';
+          materialInput.value = setup.material || '';
+          
+          if (setup.questionTypes) {
+            includeVocab.checked = setup.questionTypes.vocab || false;
+            includeShortAnswer.checked = setup.questionTypes.shortAnswer || false;
+            includeLongAnswer.checked = setup.questionTypes.longAnswer || false;
+            includeEssay.checked = setup.questionTypes.essay || false;
+          }
+          
+          vocabInput.value = setup.vocab || '';
+          shortAnswerInput.value = setup.shortAnswer || '';
+          longAnswerInput.value = setup.longAnswer || '';
+          essayInput.value = setup.essay || '';
+          
+          updateSectionVisibility();
+          autoSave();
+          
+          setLeftStatus('Setup loaded', 'ok');
+        } catch (err) {
+          showError('Failed to load setup file.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    
+    input.click();
+  });
+
+  // ===== EXPORT RESULTS =====
+  exportBtn.addEventListener('click', () => {
+    if (!gradingResults) {
+      showError('No results to export. Grade your answers first.');
+      return;
+    }
+
+    const answers = [];
+    const textareas = questionsContainer.querySelectorAll('textarea[data-qid]');
+    textareas.forEach(ta => {
+      const qid = parseInt(ta.dataset.qid, 10);
+      const question = currentQuestions.find(q => q.id === qid);
+      if (question) {
+        const feedback = gradingResults.questions.find(f => f.question_id === qid);
+        answers.push({
+          question: question.text,
+          type: question.type,
+          your_answer: ta.value.trim() || '[No answer]',
+          score: feedback?.score || 0,
+          feedback: {
+            correct: feedback?.what_was_correct || '',
+            missing: feedback?.what_was_missing || '',
+            improvement: feedback?.improvement_advice || ''
+          }
+        });
+      }
+    });
+
+    const exportData = {
+      subject: subjectInput.value.trim() || 'General Study',
+      timestamp: new Date().toISOString(),
+      overall_score: gradingResults.overall_score,
+      overall_summary: gradingResults.overall_summary,
+      questions_and_answers: answers
+    };
+
+    const json = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `study-results-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    setRightStatus('Results exported', 'ok');
+  });
+
+  // ===== INITIALIZATION =====
+  loadApiKey();
+  loadAutoSave();
+</script>
+</body>
+</html>
